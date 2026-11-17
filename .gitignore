@@ -1,0 +1,6 @@
+# Jamais de données réelles dans ce dépôt PUBLIC : les réglages d'entreprise (logo,
+# e-mails) se transmettent à part, dans un fichier qui ne passe pas par ici.
+*reglages*.json
+*sauvegarde*.json
+.DS_Store
+.playwright-mcp/

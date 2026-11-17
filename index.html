@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1a59cc">
+<title>Reste à faire</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="barre">
+  <button id="btn-pdf" class="bouton-barre" aria-label="PDF">PDF</button>
+  <h1>Reste à faire</h1>
+  <button id="btn-reglages" class="bouton-barre" aria-label="Réglages">⚙︎</button>
+</header>
+
+<main id="principal">
+  <div id="bandeau-reglages" class="carte alerte" hidden>
+    <strong>Première ouverture</strong>
+    <p>Importe le fichier de réglages reçu par WhatsApp ou par mail : il remplit le nom de l'entreprise, le logo et les personnes à qui envoyer.</p>
+    <button class="bouton plein" id="btn-importer-bandeau">Importer les réglages</button>
+  </div>
+
+  <section class="carte">
+    <label class="champ">Chantier
+      <select id="choix-chantier"></select>
+    </label>
+    <label class="champ">À l'attention de
+      <select id="choix-destinataire"></select>
+    </label>
+    <p id="synthese" class="discret"></p>
+  </section>
+
+  <div id="message" class="carte message" hidden></div>
+  <div id="liste"></div>
+</main>
+
+<button id="btn-ajouter" class="flottant" aria-label="Noter un point">+</button>
+
+<!-- Formulaire d'un point -->
+<dialog id="dlg-point" class="plein-ecran">
+  <form method="dialog" id="form-point">
+    <header class="barre">
+      <button type="button" class="bouton-barre" data-fermer>Annuler</button>
+      <h2 id="titre-point">Nouveau point</h2>
+      <button type="submit" class="bouton-barre fort" id="btn-enregistrer">Enregistrer</button>
+    </header>
+    <div class="contenu">
+      <section class="carte">
+        <h3 id="titre-ou">Où ?</h3>
+        <div class="sous-titre">Bâtiment <button type="button" class="lien" data-modifier="batiments">Modifier la liste</button></div>
+        <div class="pastilles" id="pastilles-batiments"></div>
+        <div class="sous-titre">Étage <button type="button" class="lien" data-modifier="etages">Modifier la liste</button></div>
+        <div class="pastilles" id="pastilles-etages"></div>
+        <label class="champ">Précision
+          <input id="precision" placeholder="Piscine, local technique…" autocomplete="off">
+        </label>
+        <p class="discret">Toucher = choisir, toucher à nouveau = aucun. « Modifier la liste » : × retire de ce chantier (les points déjà notés gardent leur valeur).</p>
+      </section>
+      <section class="carte">
+        <h3>Ce qui reste à faire</h3>
+        <textarea id="texte" rows="4" placeholder="Dicte avec le micro du clavier…"></textarea>
+      </section>
+      <section class="carte">
+        <h3>Qui ?</h3>
+        <div class="segments">
+          <button type="button" data-qui="moi">À notre charge</button>
+          <button type="button" data-qui="autreLot">Bloqué</button>
+        </div>
+        <div id="zone-causes" hidden>
+          <p class="discret">Ce qui bloque :</p>
+          <div class="pastilles" id="pastilles-causes"></div>
+          <input id="cause-libre" placeholder="Autre cause" hidden autocomplete="off">
+        </div>
+      </section>
+      <section class="carte">
+        <h3>Photo</h3>
+        <img id="apercu-photo" alt="" hidden>
+        <div class="ligne-boutons">
+          <label class="bouton">📷 Prendre<input type="file" accept="image/*" capture="environment" id="photo-camera" hidden></label>
+          <label class="bouton">🖼 Choisir<input type="file" accept="image/*" id="photo-galerie" hidden></label>
+          <button type="button" class="bouton danger" id="photo-retirer" hidden>Retirer</button>
+        </div>
+      </section>
+      <section class="carte" id="section-etat" hidden>
+        <h3>État</h3>
+        <p id="etat-texte"></p>
+        <div class="ligne-boutons">
+          <button type="button" class="bouton" id="btn-basculer-regle"></button>
+          <button type="button" class="bouton danger" id="btn-supprimer-point">Supprimer</button>
+        </div>
+      </section>
+    </div>
+  </form>
+</dialog>
+
+<!-- Choix du contenu du PDF -->
+<dialog id="dlg-choix" class="plein-ecran">
+  <header class="barre">
+    <button type="button" class="bouton-barre" data-fermer>Annuler</button>
+    <h2>Que mettre dans le PDF ?</h2>
+    <span class="bouton-barre"></span>
+  </header>
+  <div class="contenu">
+    <section class="carte">
+      <label class="interrupteur"><input type="checkbox" id="inclure-regles"> Inclure les points réglés</label>
+      <div class="ligne-boutons espaces">
+        <button type="button" class="lien" id="btn-tout">Tout</button>
+        <button type="button" class="lien" id="btn-rien">Rien</button>
+      </div>
+    </section>
+    <div id="grille"></div>
+  </div>
+  <footer class="pied-actions">
+    <strong id="compteur"></strong>
+    <small id="perimetre" class="discret"></small>
+    <div class="ligne-boutons trois">
+      <button type="button" class="bouton" id="btn-apercu">Aperçu</button>
+      <button type="button" class="bouton plein" id="btn-envoyer">Envoyer</button>
+      <button type="button" class="bouton" id="btn-partager">Partager</button>
+    </div>
+  </footer>
+</dialog>
+
+<!-- Aperçu du PDF -->
+<dialog id="dlg-apercu" class="plein-ecran">
+  <header class="barre">
+    <button type="button" class="bouton-barre" data-fermer>‹ Retour</button>
+    <h2>Aperçu</h2>
+    <span class="bouton-barre"></span>
+  </header>
+  <div class="contenu fond-gris" id="pages-apercu"></div>
+  <footer class="pied-actions">
+    <div class="ligne-boutons deux">
+      <button type="button" class="bouton plein" id="btn-apercu-envoyer">Envoyer</button>
+      <button type="button" class="bouton" id="btn-apercu-partager">Partager</button>
+    </div>
+  </footer>
+</dialog>
+
+<!-- Réglages -->
+<dialog id="dlg-reglages" class="plein-ecran">
+  <header class="barre">
+    <button type="button" class="bouton-barre" data-fermer>Fermer</button>
+    <h2>Réglages</h2>
+    <span class="bouton-barre"></span>
+  </header>
+  <div class="contenu">
+    <section class="carte">
+      <h3>Fichier de réglages</h3>
+      <p class="discret">Remplit l'entreprise, le logo, ta signature et les personnes à qui envoyer. Tes chantiers et tes points ne sont pas touchés.</p>
+      <label class="bouton plein">Importer les réglages<input type="file" accept=".json,application/json" id="fichier-reglages" hidden></label>
+    </section>
+    <section class="carte">
+      <h3>Chantiers</h3>
+      <div id="liste-chantiers"></div>
+      <button type="button" class="bouton" id="btn-nouveau-chantier">+ Nouveau chantier</button>
+    </section>
+    <section class="carte">
+      <h3>Envoyer à</h3>
+      <div id="liste-destinataires"></div>
+      <button type="button" class="bouton" id="btn-ajouter-destinataire">+ Ajouter une personne</button>
+    </section>
+    <section class="carte">
+      <h3>Entreprise (en-tête et cachet du PDF)</h3>
+      <label class="champ">Nom<input id="ent-nom" autocomplete="organization"></label>
+      <label class="champ">Adresse<input id="ent-adresse" autocomplete="street-address"></label>
+      <label class="champ">Téléphone<input id="ent-tel" inputmode="tel"></label>
+      <label class="champ">Ta signature (fin du mail)<input id="signature" autocomplete="name"></label>
+      <div class="logo-ligne">
+        <img id="ent-logo" alt="Logo" hidden>
+        <label class="bouton">Choisir un logo<input type="file" accept="image/png,image/jpeg" id="fichier-logo" hidden></label>
+        <button type="button" class="bouton danger" id="btn-retirer-logo" hidden>Retirer</button>
+      </div>
+    </section>
+    <section class="carte">
+      <h3>Sauvegarde</h3>
+      <p class="discret">Tes points ne sont QUE sur ce téléphone. Fais une sauvegarde de temps en temps (et avant de changer de téléphone ou de vider Chrome).</p>
+      <div class="ligne-boutons">
+        <button type="button" class="bouton" id="btn-sauvegarder">Faire une sauvegarde</button>
+        <label class="bouton">Restaurer<input type="file" accept=".json,application/json" id="fichier-sauvegarde" hidden></label>
+      </div>
+      <p id="info-stockage" class="discret"></p>
+    </section>
+  </div>
+</dialog>
+
+<!-- Petite saisie (nouvelle pastille, chantier, personne) -->
+<dialog id="dlg-saisie" class="petit">
+  <form method="dialog" id="form-saisie">
+    <h3 id="saisie-titre"></h3>
+    <div id="saisie-champs"></div>
+    <div class="ligne-boutons fin">
+      <button type="button" class="bouton" data-fermer>Annuler</button>
+      <button type="submit" class="bouton plein" id="saisie-ok">OK</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" popover="manual" hidden></div>
+
+<script src="lib/jspdf.umd.min.js"></script>
+<script src="lib/pdf.min.js"></script>
+<script src="regles.js"></script>
+<script src="stockage.js"></script>
+<script src="document.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

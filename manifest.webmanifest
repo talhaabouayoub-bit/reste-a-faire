@@ -1,0 +1,16 @@
+{
+  "name": "Reste à faire",
+  "short_name": "Reste à faire",
+  "description": "Points en suspens d'un chantier, notés sur place et envoyés en PDF.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f2f2f7",
+  "theme_color": "#1a59cc",
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
