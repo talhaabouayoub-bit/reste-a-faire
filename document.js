@@ -1,7 +1,7 @@
 /* Le PDF « Points en suspens » (jsPDF), même mise en page que celui de JournéePro :
  * en-tête (titre, chantier, adresse, « À l'attention de », date, périmètre, logo à droite),
  * synthèse grisée, sections Bloqués / À notre charge / Réglés, photo à droite de chaque point,
- * mention de clôture, cachet en bas à droite, pied de page numéroté.
+ * mention de clôture, coordonnées de l'entreprise sous le logo, pied de page numéroté.
  * Le mot « réserves » n'y figure jamais : il a une portée juridique (PV de réception).
  */
 (function (racine) {
@@ -137,6 +137,24 @@
       doc.addImage(logo.data, 'JPEG', W - mL - w, y, w, cote);
       basLogo = y + cote;
     }
+    // Coordonnées de l'entreprise, sous le logo, alignées à droite (1re page seulement).
+    const coord = [reglages.entreprise.nom, ...String(reglages.entreprise.adresse || '').split('\n'),
+      reglages.entreprise.telephone].map((s) => (s || '').trim()).filter(Boolean);
+    if (coord.length) {
+      const xd = W - mL, largeurCoord = 115;
+      let yc = basLogo + (logo ? 12 : 10);
+      police(9.5, 'bold'); couleur([0, 0, 0]);
+      const tNom = lignes(coord[0], largeurCoord);
+      doc.text(tNom, xd, yc, { align: 'right' });
+      yc += hauteur(tNom.length, 9.5);
+      police(8); couleur(GRIS);
+      for (const l of coord.slice(1)) {
+        const t = lignes(l, largeurCoord);
+        doc.text(t, xd, yc, { align: 'right' });
+        yc += hauteur(t.length, 8);
+      }
+      basLogo = yc - 6;
+    }
     y += 30;
     police(14, 'bold'); couleur([0, 0, 0]);
     doc.text(lignes(chantier.nom || 'Chantier', largeurEntete), mL, y + 12);
@@ -188,19 +206,6 @@
     doc.text(tMention, mL, y + 8);
     y += hauteur(tMention.length, 9.5) + 6;
 
-    // ── Cachet (texte), en bas à droite de la dernière page ──
-    const cachet = [reglages.entreprise.nom, reglages.entreprise.adresse, reglages.entreprise.telephone]
-      .map((s) => (s || '').trim()).filter(Boolean);
-    if (cachet.length) {
-      const hCachet = 14 + (cachet.length - 1) * 11;
-      if (pied - 45 - hCachet < y + 12) nouvellePage();
-      let yc = pied - 45 - hCachet + 10;
-      const xd = W - 57;
-      police(11, 'bold'); couleur([0, 0, 0]);
-      doc.text(cachet[0], xd, yc, { align: 'right' });
-      police(8.5); couleur(GRIS);
-      cachet.slice(1).forEach((l) => { yc += 11; doc.text(l, xd, yc, { align: 'right' }); });
-    }
     piedDePage();
     return doc.output('blob');
   }
