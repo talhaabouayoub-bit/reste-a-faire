@@ -1,6 +1,6 @@
 /* Hors réseau : les fichiers de l'app sont gardés sur le téléphone. Changer VERSION à chaque
  * mise en ligne, sinon le téléphone garde l'ancienne version. */
-const VERSION = 'raf-v1';
+const VERSION = 'raf-v2';
 const FICHIERS = ['./', 'index.html', 'style.css', 'app.js', 'regles.js', 'stockage.js', 'document.js',
   'manifest.webmanifest', 'icone-192.png', 'icone-512.png',
   'lib/jspdf.umd.min.js', 'lib/pdf.min.js', 'lib/pdf.worker.min.js'];

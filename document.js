@@ -68,6 +68,8 @@
       police(8); couleur(GRIS_CLAIR);
       doc.text('Points en suspens — ' + (chantier.nom || 'Chantier') + ' — établi le ' + R.dateCourte(quand) +
         '   ·   Page ' + page, mL, pied);
+      police(6);
+      doc.text('Application : Air & Eau Montage', W - mL, pied + 10, { align: 'right' });
     }
     function nouvellePage() { piedDePage(); doc.addPage(); page += 1; y = haut; }
     function placer(h) { if (y + h > bas) nouvellePage(); }
